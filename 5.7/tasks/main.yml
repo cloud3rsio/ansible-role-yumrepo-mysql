@@ -31,7 +31,6 @@
 
 - name: Enabled mysql repo
   command: yum-config-manager --enable mysql57-community
-  when: (ansible_distribution == "Amazon" and mysql57_community_status.rc != 0) or (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7" and mysql57_community_status.rc != 0)
   when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8" and mysql57_community_status_2.rc != 0
 
 - name: Disable mysql8.0 repo
