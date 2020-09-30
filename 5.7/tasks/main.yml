@@ -1,0 +1,38 @@
+---
+- name: Check mysql repo status
+  shell: yum-config-manager mysql57-community | grep -q 'enabled = True'
+  changed_when: False
+  ignore_errors: True
+  register: mysql57_community_status
+  when: ansible_distribution == "Amazon" or (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7")
+
+- name: Check mysql repo status
+  shell: yum-config-manager --dump mysql57-community | grep -q 'enabled = 1'
+  changed_when: False
+  ignore_errors: True
+  register: mysql57_community_status_2
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
+
+- name: Install mysql repo
+  yum:
+    name: https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+    state: present
+  when: ansible_distribution == "Amazon" or (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7")
+
+- name: Install mysql repo
+  yum:
+    name: https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm
+    state: present
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
+
+- name: Enabled mysql repo
+  command: yum-config-manager --enable mysql57-community
+  when: (ansible_distribution == "Amazon" and mysql57_community_status.rc != 0) or (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7" and mysql57_community_status.rc != 0)
+
+- name: Enabled mysql repo
+  command: yum-config-manager --enable mysql57-community
+  when: (ansible_distribution == "Amazon" and mysql57_community_status.rc != 0) or (ansible_distribution == "CentOS" and ansible_distribution_major_version == "7" and mysql57_community_status.rc != 0)
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8" and mysql57_community_status_2.rc != 0
+
+- name: Disable mysql8.0 repo
+  command: yum-config-manager --disable mysql80-community
